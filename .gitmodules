@@ -1,0 +1,3 @@
+[submodule "submodules/wsi_efficient_seg"]
+	path = submodules/wsi_efficient_seg
+	url = https://github.com/maianhpuco/wsi_efficient_seg
