@@ -5,7 +5,6 @@ import numpy as np
 import pdb
 
 class Attn_Net(nn.Module):
-
     def __init__(self, L = 1024, D = 256, dropout = False, n_classes = 1):
         super(Attn_Net, self).__init__()
         self.module = [
@@ -54,7 +53,6 @@ class Attn_Net_Gated(nn.Module):
         A = a.mul(b)
         A = self.attention_c(A)  # N x n_classes
         return A, x 
-
 
 class Bag_Classifier(nn.Module):
     def __init__(

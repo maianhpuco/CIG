@@ -1,6 +1,12 @@
 /checkpoints
-/plot_path
-/slide_path
-/attribution_scores_ver
-/features_h5_path
+/plots
+/slides
+/attribution_scores
+/features_h5
 /attr_method/__pycache__
+/utils/__pycache__
+/datasets/__pycache__
+/models/__pycache__
+/main_ig.py
+/main_plot_ig.py
+/main_plot_ig.py

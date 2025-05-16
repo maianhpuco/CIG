@@ -1,5 +1,5 @@
 import os
-import sys 
+import sys
 import torch
 from tqdm import tqdm 
 import glob
@@ -59,26 +59,20 @@ def main(args):
     #---------------------------------------------------- 
     if args.ig_name=='integrated_gradient':
         from attr_method.integrated_gradient import IntegratedGradients as AttrMethod 
-       
     elif args.ig_name=='vanilla_gradient':
         from attr_method.vanilla_gradient import VanillaGradients as AttrMethod 
-    
     elif args.ig_name=='contrastive_gradient':
         from attr_method.contrastive_gradient import ContrastiveGradients as AttrMethod 
-
     elif args.ig_name=='expected_gradient':
        from attr_method.expected_gradient import ExpectedGradients as AttrMethod   
-    
     elif args.ig_name=='integrated_decision_gradient':
        from attr_method.integrated_decision_gradient import IntegratedDecisionGradients as AttrMethod     
-  
     elif args.ig_name=='optim_square_integrated_gradient':
        from attr_method.optim_square_integrated_gradient import OptimSquareIntegratedGradients as AttrMethod
-    
     elif args.ig_name=='square_integrated_gradient':
-       from attr_method.square_integrated_gradient import SquareIntegratedGradients as AttrMethod     
+       from attr_method.square_integrated_gradient import SquareIntegratedGradients as AttrMethod   
     else:
-        print(f"Unsupported for {args.ig_name}")
+        raise ValueError(f"Invalid attribution method: {args.ig_name}")
     # LIME
     # KernelSHAP
     # DeepSHAP 
@@ -89,7 +83,7 @@ def main(args):
     #----------------------------------------------------    
     attribution_method = AttrMethod()   
     
-    score_save_path = os.path.join(args.attribution_scores_folder, f'{args.ig_name}') 
+    score_save_path = os.path.join(args.attribution_scores_dir, f'{args.ig_name}') 
     # print("score_save_path", score_save_path)
     # if os.path.exists(score_save_path):
     #     shutil.rmtree(score_save_path)  # Delete the existing directory
@@ -101,22 +95,22 @@ def main(args):
     
     if args.dry_run==1:
         dataset = IG_dataset(
-            args.features_h5_path,
-            args.slide_path,
+            args.features_h5_dir,
+            args.slides_dir,
             basenames=['tumor_026', 'tumor_031', 'tumor_032','tumor_036']
         )   
         
     else:
         basenames = [] 
-        for basename in os.listdir(args.slide_path):
+        for basename in os.listdir(args.slides_dir):
             basename = basename.split(".")[0]
             if basename.startswith('normal_'): 
             # if basename.startswith(('tumor_', 'test_')):  # Check if it starts with either prefix
                 basenames.append(basename)
         
         dataset = IG_dataset(
-            args.features_h5_path,
-            args.slide_path,
+            args.features_h5_dir,
+            args.slides_dir,
             basenames=basenames
             )
         
@@ -145,12 +139,13 @@ def main(args):
             dataset, num_files=20) 
         stacked_features_baseline = stacked_features_baseline.numpy() 
         
+        # if args.ig_name=='ig':
         kwargs = {
             "x_value": features,  
             "call_model_function": call_model_function,  
             "model": mil_model,  
             "baseline_features": stacked_features_baseline,  # Optional
-            # "memmap_path": args.memmap_path, 
+            "memmap_path": args.memmap_path, 
             "x_steps": 50,  
         }  
  
@@ -177,49 +172,45 @@ if __name__=="__main__":
                         'optim_square_integrated_gradient'
                         ],
                     help='Choose the attribution method to use.') 
-    parser.add_argument('--attribution_scores_folder', type=str)
-    parser.add_argument('--checkpoints_dir', type=str)
-    parser.add_argument('--slide_path', type=str)
-    parser.add_argument('--features_h5_path', type=str)
-    parser.add_argument('--do_normalizing', type=bool)
+    parser.add_argument('--bag_classifier', 
+                    type=str, 
+                    default='mil', 
+                    choices=[
+                        'mil', 
+                        'clam', 
+                        'dsmil'
+                    ],
+                    help='Choose the bag classifier to use.')
     
     args = parser.parse_args()
+
+    if not os.path.exists(f'./{args.config_file}'):
+        raise ValueError(f"{args.config_file} does not exist")
     
-    if os.path.exists(f'./testbest_config/{args.config_file}.yaml'):
-        config = load_config(f'./testbest_config/{args.config_file}.yaml')
-        args.use_features = config.get('use_features', True)
-        
-        args.slide_path = config.get('SLIDE_PATH')
-        # args.json_path = config.get('JSON_PATH')
-        # args.spixel_path = config.get('SPIXEL_PATH')
-        # args.patch_path = config.get('PATCH_PATH') # save all the patch (image)
-        args.features_h5_path = config.get("FEATURES_H5_PATH") # save all the features
-        args.checkpoints_dir = config.get("CHECKPOINT_PATH")
-        if args.dry_run==1:
-            args.attribution_scores_folder = config.get("SCORE_FOLDER_DRYRUN") 
-            args.plot_path = config.get("PLOT_PATH_DRYRUN")    
-            print("----")
-            
-            print("args.attribution_scores_folder", args.attribution_scores_folder)
-            print("args.plot_path", args.plot_path)
-            
-        else: 
-            args.attribution_scores_folder = config.get("SCORE_FOLDER")    
-            args.plot_path = config.get("PLOT_PATH") 
-        print("Attribution folder path", args.attribution_scores_folder)
-        
-        os.makedirs(args.features_h5_path, exist_ok=True)  
-        os.makedirs(args.attribution_scores_folder, exist_ok=True) 
-        args.batch_size = config.get('batch_size')
-        args.feature_extraction_model = config.get('feature_extraction_model')
-        args.device = "cuda" if torch.cuda.is_available() else "cpu"
-        args.feature_mean_std_path=config.get("FEATURE_MEAN_STD_PATH")
-        # args.ig_name = "integrated_gradients"
-        args.do_normalizing = True
-        args.memmap_path = config.get("MEMMAP_PATH")
-        
-    # CHECK_POINT_FILE = 'mil_checkpoint_draft.pth' 
-    CHECK_POINT_FILE = 'mil_checkpoint.pth'   
+    config = load_config(f'{args.config_file}')
+    args.use_features = config.get('USE_FEATURES', True)
+    args.slides_dir = config.get('SLIDES_DIR')
+    args.features_h5_dir = config.get("FEATURES_H5_DIR") # save all the features
+    args.checkpoints_dir = config.get("CHECKPOINTS_DIR")
+    args.attribution_scores_dir = config.get("ATTRIBUTION_SCORES_DIR")    
+    args.plots_dir = config.get("PLOTS_DIR") 
+    os.makedirs(args.features_h5_dir, exist_ok=True)  
+    os.makedirs(args.attribution_scores_dir, exist_ok=True) 
+    args.batch_size = config.get('BATCH_SIZE')
+    args.device = "cuda" if torch.cuda.is_available() else "cpu"
+    args.feature_mean_std_path=config.get("FEATURE_MEAN_STD_PATH")
+    args.do_normalizing = True
+    args.memmap_path = config.get("MEMMAP_PATH")
+    
+    if args.bag_classifier=='mil':
+        CHECK_POINT_FILE = 'mil_checkpoint.pth'   
+    elif args.bag_classifier=='clam':
+        CHECK_POINT_FILE = 'clam_checkpoint.pth'
+    elif args.bag_classifier=='dsmil':
+        CHECK_POINT_FILE = 'dsmil_checkpoint.pth'
+    else:
+        raise ValueError(f"Invalid bag classifier: {args.bag_classifier}")
+    
     main(args) 
    
    

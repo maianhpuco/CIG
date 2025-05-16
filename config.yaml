@@ -1,0 +1,6 @@
+ATTRIBUTION_SCORES_DIR: './attribution_scores'
+CHECKPOINTS_DIR: './checkpoints'
+FEATURES_H5_DIR: './features_h5'
+FEATURE_MEAN_STD_PATH: './mean_std.h5'
+SLIDES_DIR: './slides'
+PLOTS_DIR: './plots'
