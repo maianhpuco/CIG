@@ -1,42 +1,29 @@
 import os
-import sys 
 import torch
-from tqdm import tqdm 
-import glob
-import pandas as pd
 import numpy as np
 import argparse
-import time   
 import shutil 
 import h5py
-import random 
 import numpy as np
 import torch
-import torch.nn as nn 
-import torch.optim as optim
-from torch.utils.data import DataLoader 
-from utils.utils import load_config
-from utils.plotting import (
+from src.utils.utils import load_config
+from src.utils.plotting import (
     plot_heatmap_with_bboxes,
-    get_region_original_size,
-    downscaling,
     rescaling_stat_for_segmentation, 
     min_max_scale, 
     replace_outliers_with_bounds 
 ) 
-from datasets.ig_dataset import IG_dataset 
 import openslide
 import glob 
-import matplotlib.pyplot as plt
  
 def main(args): 
     '''
     Input: h5 file
     Output: save scores into a json folder
     '''
-    all_scores_paths = glob.glob(os.path.join(args.attribution_scores_dir, f'{args.ig_name}', "*.npy"))
+    all_scores_paths = glob.glob(os.path.join(args.attribution_scores_dir, 'contrastive_gradient', "*.npy"))
         
-    plots_dir = os.path.join(args.plots_dir, f'{args.ig_name}')    
+    plots_dir = os.path.join(args.plots_dir, 'contrastive_gradient')    
     
     if os.path.exists(plots_dir):
         shutil.rmtree(plots_dir)  # Delete the existing directory
@@ -64,7 +51,6 @@ def main(args):
         scale_y = new_height / original_height
         h5_file_path = os.path.join(args.features_h5_dir, f'{basename}.h5') 
         
-        result = {} 
         with h5py.File(h5_file_path, "r") as f:
             coordinates= f['coordinates'][:]
         scaled_scores = min_max_scale(replace_outliers_with_bounds(scores_array.copy()))
@@ -78,26 +64,13 @@ def main(args):
             save_path = plot_path
         ) 
         print("-> Save the plot at: ", plot_path)
-        # scale_x, scale_y, new_height, new_width  
 
 
 if __name__ == '__main__':
     # get config 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dry_run', type=int, default=0)
-    parser.add_argument('--config_file', default='ma_exp002')
-    parser.add_argument('--ig_name', 
-                    default='integrated_gradients', 
-                    choices=[
-                        'integrated_gradient', 
-                        'expected_gradient', 
-                        'integrated_decision_gradient', 
-                        'contrastive_gradient', 
-                        'vanilla_gradient', 
-                        'square_integrated_gradient', 
-                        'optim_square_integrated_gradient'
-                        ],
-                    help='Choose the attribution method to use.')
+    parser.add_argument('--config_file', default='config.yaml')
     
     args = parser.parse_args()
     

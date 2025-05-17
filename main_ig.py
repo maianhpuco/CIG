@@ -8,11 +8,12 @@ from src.bag_classifier.mil_classifier import MILClassifier
 import torch
 import torch.optim as optim
 from src.bag_classifier.mil_classifier import MILClassifier
-from utils.utils import load_config
-from utils.train_classifier.train_mlclassifier import load_checkpoint
+from src.utils import load_config
+from src.utils.train_classifier.train_mlclassifier import load_checkpoint
 import h5py
-from datasets.ig_dataset import IG_dataset 
-from attr_method._common import sample_random_features, call_model_function
+from src.datasets.ig_dataset import IG_dataset 
+from src.attr_method._common import sample_random_features, call_model_function
+from src.attr_method.contrastive_gradient import ContrastiveGradients as AttrMethod 
 
 def load_model(checkpoint_path):
     input_dim = 768  # Adjust according to dataset
@@ -22,35 +23,10 @@ def load_model(checkpoint_path):
     return model 
 
 def main(args): 
-    '''
-    Input: h5 file
-    Output: save scores into a json folder
-    '''
-    #---------------------------------------------------- 
-    if args.ig_name=='integrated_gradient':
-        from attr_method.integrated_gradient import IntegratedGradients as AttrMethod 
-    elif args.ig_name=='vanilla_gradient':
-        from attr_method.vanilla_gradient import VanillaGradients as AttrMethod 
-    elif args.ig_name=='contrastive_gradient':
-        from attr_method.contrastive_gradient import ContrastiveGradients as AttrMethod 
-    elif args.ig_name=='expected_gradient':
-       from attr_method.expected_gradient import ExpectedGradients as AttrMethod   
-    elif args.ig_name=='integrated_decision_gradient':
-       from attr_method.integrated_decision_gradient import IntegratedDecisionGradients as AttrMethod     
-    elif args.ig_name=='optim_square_integrated_gradient':
-       from attr_method.optim_square_integrated_gradient import OptimSquareIntegratedGradients as AttrMethod
-    elif args.ig_name=='square_integrated_gradient':
-       from attr_method.square_integrated_gradient import SquareIntegratedGradients as AttrMethod   
-    else:
-        raise ValueError(f"Invalid attribution method: {args.ig_name}")
-
-    print(f"Running for {args.ig_name} Attribution method") 
-    
-    
     #----------------------------------------------------    
     attribution_method = AttrMethod()   
     
-    score_save_path = os.path.join(args.attribution_scores_dir, f'{args.ig_name}') 
+    score_save_path = os.path.join(args.attribution_scores_dir, 'contrastive_gradient') 
 
     checkpoint_path = os.path.join(args.checkpoints_dir, f'{CHECK_POINT_FILE}')
     mil_model = load_model(checkpoint_path)
@@ -109,19 +85,7 @@ def main(args):
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dry_run', type=int, default=0)
-    parser.add_argument('--config_file', default='ma_exp002')
-    parser.add_argument('--ig_name', 
-                    default='integrated_gradients', 
-                    choices=[
-                        'integrated_gradient', 
-                        'expected_gradient', 
-                        'integrated_decision_gradient', 
-                        'contrastive_gradient', 
-                        'vanilla_gradient', 
-                        'square_integrated_gradient', 
-                        'optim_square_integrated_gradient'
-                        ],
-                    help='Choose the attribution method to use.') 
+    parser.add_argument('--config_file', default='config.yaml')
     parser.add_argument('--bag_classifier', 
                     type=str, 
                     default='mil', 
@@ -131,7 +95,6 @@ if __name__=="__main__":
                         'dsmil'
                     ],
                     help='Choose the bag classifier to use.')
-    
     args = parser.parse_args()
 
     if not os.path.exists(f'./{args.config_file}'):
