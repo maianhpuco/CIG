@@ -1,48 +1,18 @@
 import os
-import sys
 import torch
-from tqdm import tqdm 
-import glob
-import pandas as pd
 import numpy as np
 import argparse
 import time   
-import timm 
-import shutil 
-# import yaml 
-import random 
 import numpy as np
 from src.bag_classifier.mil_classifier import MILClassifier 
 import torch
-import torch.nn as nn 
 import torch.optim as optim
-import saliency.core as saliency
-from saliency.core.base import CoreSaliency
-from saliency.core.base import INPUT_OUTPUT_GRADIENTS
-from torch.utils.data import DataLoader 
-from src.bag_classifier.mil_classifier import MILClassifier # in the repo
-from data.feature_dataset import FeaturesDataset  # in the repo
+from src.bag_classifier.mil_classifier import MILClassifier
 from utils.utils import load_config
-from utils.train_classifier.train_mlclassifier import (
-    save_checkpoint, 
-    load_checkpoint
-)
-import h5py 
-import pickle 
-
-from utils.plotting import (
-    plot_heatmap_with_bboxes,
-    get_region_original_size,
-    downscaling,
-    rescaling_stat_for_segmentation
-) 
+from utils.train_classifier.train_mlclassifier import load_checkpoint
+import h5py
 from data.ig_dataset import IG_dataset 
-from attr_method._common import (
-    sample_random_features, 
-    get_mean_std_for_normal_dist, 
-    PreprocessInputs, 
-    call_model_function
-)
+from attr_method._common import sample_random_features, call_model_function
 
 def load_model(checkpoint_path):
     input_dim = 768  # Adjust according to dataset
@@ -73,10 +43,7 @@ def main(args):
        from attr_method.square_integrated_gradient import SquareIntegratedGradients as AttrMethod   
     else:
         raise ValueError(f"Invalid attribution method: {args.ig_name}")
-    # LIME
-    # KernelSHAP
-    # DeepSHAP 
-    
+
     print(f"Running for {args.ig_name} Attribution method") 
     
     
@@ -84,35 +51,21 @@ def main(args):
     attribution_method = AttrMethod()   
     
     score_save_path = os.path.join(args.attribution_scores_dir, f'{args.ig_name}') 
-    # print("score_save_path", score_save_path)
-    # if os.path.exists(score_save_path):
-    #     shutil.rmtree(score_save_path)  # Delete the existing directory
-    # os.makedirs(score_save_path)    
-    
 
     checkpoint_path = os.path.join(args.checkpoints_dir, f'{CHECK_POINT_FILE}')
     mil_model = load_model(checkpoint_path)
     
-    if args.dry_run==1:
-        dataset = IG_dataset(
-            args.features_h5_dir,
-            args.slides_dir,
-            basenames=['tumor_026', 'tumor_031', 'tumor_032','tumor_036']
-        )   
-        
-    else:
-        basenames = [] 
-        for basename in os.listdir(args.slides_dir):
-            basename = basename.split(".")[0]
-            if basename.startswith('normal_'): 
-            # if basename.startswith(('tumor_', 'test_')):  # Check if it starts with either prefix
-                basenames.append(basename)
-        
-        dataset = IG_dataset(
-            args.features_h5_dir,
-            args.slides_dir,
-            basenames=basenames
-            )
+    basenames = [] 
+    for basename in os.listdir(args.slides_dir):
+        basename = basename.split(".")[0]
+        if basename.startswith('normal_'): 
+            basenames.append(basename)
+    
+    dataset = IG_dataset(
+        args.features_h5_dir,
+        args.slides_dir,
+        basenames=basenames
+    )
         
     if args.do_normalizing: 
         with h5py.File(args.feature_mean_std_path, "r") as f:
@@ -128,18 +81,15 @@ def main(args):
         features = data['features']  # Shape: (batch_size, num_patches, feature_dim)
         label = data['label']
         start = time.time() 
-            
     
         if args.do_normalizing:   
             print("----- normalizing")
             features = (features - mean) / (std + 1e-8)  
         
         # randomly sampling #file to create the baseline 
-        stacked_features_baseline, selected_basenames =  sample_random_features(
-            dataset, num_files=20) 
+        stacked_features_baseline, selected_basenames = sample_random_features(dataset, num_files=20) 
         stacked_features_baseline = stacked_features_baseline.numpy() 
         
-        # if args.ig_name=='ig':
         kwargs = {
             "x_value": features,  
             "call_model_function": call_model_function,  
@@ -187,7 +137,7 @@ if __name__=="__main__":
     if not os.path.exists(f'./{args.config_file}'):
         raise ValueError(f"{args.config_file} does not exist")
     
-    config = load_config(f'{args.config_file}')
+    config = load_config(f'./{args.config_file}')
     args.use_features = config.get('USE_FEATURES', True)
     args.slides_dir = config.get('SLIDES_DIR')
     args.features_h5_dir = config.get("FEATURES_H5_DIR") # save all the features
@@ -211,8 +161,4 @@ if __name__=="__main__":
     else:
         raise ValueError(f"Invalid bag classifier: {args.bag_classifier}")
     
-    main(args) 
-   
-   
-   
- 
+    main(args)
