@@ -4,24 +4,23 @@ A Python-based framework for computing and analyzing various gradient-based attr
 
 ## Overview
 
-This project implements and compares different gradient-based attribution methods for Multiple Instance Learning models, specifically designed for medical image analysis. It supports various attribution techniques including:
+This project implements Contrastive Integrated Gradients (CIG), a novel attribution method for Multiple Instance Learning (MIL) models in medical imaging. CIG extends traditional Integrated Gradients by incorporating contrastive learning principles to better highlight discriminative regions in medical images.
 
-- Integrated Gradients
-- Vanilla Gradients
-- Contrastive Gradients
-- Expected Gradients
-- Integrated Decision Gradients
-- Square Integrated Gradients
-- Optimized Square Integrated Gradients
+Key features:
+- Implementation of Contrastive Integrated Gradients for MIL models
+- Support for whole slide image (WSI) analysis
+- Visualization tools for attribution maps
+- Configurable architecture for different feature extractors and MIL aggregators
+- Efficient batch processing of large medical images
+
+The method helps identify regions in medical images that are most relevant for model predictions by comparing and contrasting features between different classes. This is particularly useful for tasks like cancer detection where understanding which image regions influence the model's decision is critical.
+
 
 ## Project Structure
 
 ```
 .
-├── attr_method/                # Attribution method implementations
-├── datasets/                   # Dataset handling code
 ├── src/                        # Source code
-├── utils/                      # Utility functions
 ├── main_ig.py                  # Main script for attribution computation
 ├── main_plot_ig.py             # Script for plotting attribution results
 └── config.yaml.example         # Example configuration file
@@ -51,17 +50,9 @@ conda env create -f environment.yml
 To compute attribution scores using a specific method:
 
 ```bash
-python main_ig.py --ig_name [method_name] --config_file [config_name] --bag_classifier [model]
+python main_ig.py --config_file [config_name] --bag_classifier [model]
+python main_plot_ig.py --config_file [config_name]
 ```
-
-Available attribution methods:
-- `integrated_gradient`
-- `vanilla_gradient`
-- `contrastive_gradient`
-- `expected_gradient`
-- `integrated_decision_gradient`
-- `square_integrated_gradient`
-- `optim_square_integrated_gradient`
 
 ### Configuration
 1. Download all folders needed from link https://drive.google.com/drive/folders/1tgff35Qx2CpvW1YUfPoWtL820tdVbZ4X?usp=drive_link
