@@ -11,7 +11,7 @@ from src.bag_classifier.mil_classifier import MILClassifier
 from utils.utils import load_config
 from utils.train_classifier.train_mlclassifier import load_checkpoint
 import h5py
-from data.ig_dataset import IG_dataset 
+from datasets.ig_dataset import IG_dataset 
 from attr_method._common import sample_random_features, call_model_function
 
 def load_model(checkpoint_path):

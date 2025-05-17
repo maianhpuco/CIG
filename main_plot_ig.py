@@ -24,7 +24,7 @@ from utils.plotting import (
     min_max_scale, 
     replace_outliers_with_bounds 
 ) 
-from data.ig_dataset import IG_dataset 
+from datasets.ig_dataset import IG_dataset 
 import openslide
 import glob 
 import matplotlib.pyplot as plt
