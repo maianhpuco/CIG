@@ -1,6 +1,0 @@
-ATTRIBUTION_SCORES_DIR: './data/attribution_scores'
-CHECKPOINTS_DIR: './data/checkpoints'
-FEATURES_H5_DIR: './data/features_h5'
-FEATURE_MEAN_STD_PATH: './data/mean_std.h5'
-SLIDES_DIR: './data/slides'
-PLOTS_DIR: './data/plots'
