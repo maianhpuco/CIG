@@ -1,0 +1,14 @@
+name: cig_env
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.8
+  - numpy
+  - pytorch
+  - torchvision
+  - tqdm
+  - pip
+  - pip:
+      - saliency==0.1.3  # Or whichever version you're using
