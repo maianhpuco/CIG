@@ -42,7 +42,7 @@ attr_map = cig.GetMask(
 )
 ``` 
 
-Output: ```attr_map``` 
+Output: attr_map 
 Each row corresponds to a patch, and each column corresponds to a feature dimension. The values indicate how important each patch-level feature is to the model's prediction, based on the contrastive gradient path.
 
 
