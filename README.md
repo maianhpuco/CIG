@@ -2,13 +2,6 @@
 
 This repository contains the implementation of Contrastive Integrated Gradients (CIG), a gradient-based attribution method designed for weakly supervised classification tasks such as Whole Slide Image (WSI) analysis. CIG estimates feature importance by measuring the change in model predictions as input features are interpolated between the original sample and a counterfactual baseline sampled from the opposite class.
 
-##  Installation 
-Clone this repository and install dependencies: 
-```
-git clone https://github.com/yourusername/contrastive-integrated-gradients.git
-cd contrastive-integrated-gradients
-pip install -r requirements.txt
-```
 
 ## How to Use 
 
