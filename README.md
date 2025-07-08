@@ -25,7 +25,9 @@ Shape: [N, D]
 model: The trained model used for prediction (e.g., CLAM model).
 call_model_args: A dictionary that specifies which class index to explain, e.g., { "target_class_idx": 1 }.  
 
+
 ## Run CIG 
+
 
 ```
 cig = CIG()
