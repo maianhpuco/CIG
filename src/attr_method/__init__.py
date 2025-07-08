@@ -1,5 +1,5 @@
-from .contrastive_gradient import ContrastiveGradients
+from .cig import CIG
 
 __all__ = [
-    "ContrastiveGradients"
+    "CIG"
 ]

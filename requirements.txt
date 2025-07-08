@@ -1,0 +1,5 @@
+torch>=1.10.0
+numpy
+tqdm
+scikit-learn
+saliency==0.1.3
