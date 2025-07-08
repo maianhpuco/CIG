@@ -7,7 +7,8 @@ Clone this repository and install dependencies:
 ```
 git clone https://github.com/yourusername/contrastive-integrated-gradients.git
 cd contrastive-integrated-gradients
-pip install -r requirements.txt ```
+pip install -r requirements.txt
+```
 
 ## How to Use 
 
@@ -16,15 +17,13 @@ Import the Module
 from attr_method.cig import CIG, ModelWrapper, call_model_function 
 ``` 
 
-Prepare Inputs
-```
-`x_value`: Tensor of features for the WSI (slide) you want to explain.
+Prepare Inputs: 
+x_value: Tensor of features for the WSI (slide) you want to explain.
 Shape: [1, N, D]
-`baseline_features`: Counterfactual features sampled from a different class (e.g., non-tumor if the input is tumor).
+baseline_features: Counterfactual features sampled from a different class (e.g., non-tumor if the input is tumor).
 Shape: [N, D]
-`model`: The trained model used for prediction (e.g., CLAM model).
-`call_model_args`: A dictionary that specifies which class index to explain, e.g., { "target_class_idx": 1 }. 
-``` 
+model: The trained model used for prediction (e.g., CLAM model).
+call_model_args: A dictionary that specifies which class index to explain, e.g., { "target_class_idx": 1 }.  
 
 ## Run CIG 
 
